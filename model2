@@ -1,0 +1,308 @@
+{
+  "nbformat": 4,
+  "nbformat_minor": 0,
+  "metadata": {
+    "colab": {
+      "provenance": [],
+      "authorship_tag": "ABX9TyOihDWxe9iQoe7EICd/yOCn",
+      "include_colab_link": true
+    },
+    "kernelspec": {
+      "name": "python3",
+      "display_name": "Python 3"
+    },
+    "language_info": {
+      "name": "python"
+    }
+  },
+  "cells": [
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "view-in-github",
+        "colab_type": "text"
+      },
+      "source": [
+        "<a href=\"https://colab.research.google.com/github/luckystarlet/whatapp-forkitonyi/blob/main/model2\" target=\"_parent\"><img src=\"https://colab.research.google.com/assets/colab-badge.svg\" alt=\"Open In Colab\"/></a>"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "source": [],
+      "metadata": {
+        "id": "zhSlY4knAqTp"
+      }
+    },
+    {
+      "cell_type": "markdown",
+      "source": [
+        "Step 1: Data Collection using YouTube API"
+      ],
+      "metadata": {
+        "id": "TW8PQtSzAtYN"
+      }
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "id": "dqSGWuAp_75R"
+      },
+      "outputs": [],
+      "source": [
+        "from googleapiclient.discovery import build\n",
+        "\n",
+        "# Set up YouTube API key\n",
+        "api_key = 'AIzaSyCFmOHLqLf1VdYo7bdORV6EQWCNW6gC7Sc'\n",
+        "\n",
+        "# Initialize YouTube API client\n",
+        "youtube = build('youtube', 'v3', developerKey=api_key)\n",
+        "\n",
+        "# Search for videos using a specific query\n",
+        "def search_videos(query, max_results=50):\n",
+        "    video_ids = []\n",
+        "    request = youtube.search().list(\n",
+        "        part='id',\n",
+        "        q=query,\n",
+        "        type='video',\n",
+        "        maxResults=max_results\n",
+        "    )\n",
+        "    while request:\n",
+        "        response = request.execute()\n",
+        "        for item in response['items']:\n",
+        "            video_ids.append(item['id']['videoId'])\n",
+        "        request = youtube.search().list_next(request, response)\n",
+        "    return video_ids\n",
+        "\n",
+        "# Example: Search for videos related to 'machine learning'\n",
+        "query = 'machine learning'\n",
+        "video_ids = search_videos(query)\n",
+        "\n",
+        "# Print the first 5 video IDs\n",
+        "print(video_ids[:5])\n",
+        "# Search for comments on a specific video\n",
+        "def get_video_comments(video_id):\n",
+        "    comments = []\n",
+        "    request = youtube.commentThreads().list(\n",
+        "        part='snippet',\n",
+        "        videoId=video_id,\n",
+        "        maxResults=100  # Adjust as needed\n",
+        "    )\n",
+        "    while request:\n",
+        "        response = request.execute()\n",
+        "        for item in response['items']:\n",
+        "            comment = item['snippet']['topLevelComment']['snippet']['textOriginal']\n",
+        "            comments.append(comment)\n",
+        "        request = youtube.commentThreads().list_next(request, response)\n",
+        "    return comments\n",
+        "\n",
+        "# Example: Get comments from a video\n",
+        "video_id = 'dQw4w9WgXcQ'\n",
+        "comments = get_video_comments(video_id)\n",
+        "\n",
+        "# Convert comments to DataFrame\n",
+        "comments_df = pd.DataFrame(comments, columns=['comment'])"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "source": [
+        "Data Preprocessing**"
+      ],
+      "metadata": {
+        "id": "LtAOsXJSDVwP"
+      }
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "# Import necessary libraries for preprocessing\n",
+        "import re\n",
+        "from nltk.corpus import stopwords\n",
+        "from nltk.tokenize import word_tokenize\n",
+        "\n",
+        "# Download NLTK resources\n",
+        "import nltk\n",
+        "nltk.download('stopwords')\n",
+        "nltk.download('punkt')\n",
+        "\n",
+        "# Preprocessing function\n",
+        "def preprocess_text(text):\n",
+        "    # Convert text to lowercase\n",
+        "    text = text.lower()\n",
+        "    # Remove special characters, URLs, and usernames\n",
+        "    text = re.sub(r'http\\S+|www\\S+|@[^\\s]+', '', text)\n",
+        "    text = re.sub(r'[^\\w\\s]', '', text)\n",
+        "    # Tokenize text\n",
+        "    tokens = word_tokenize(text)\n",
+        "    # Remove stop words\n",
+        "    stop_words = set(stopwords.words('english'))\n",
+        "    filtered_tokens = [word for word in tokens if word not in stop_words]\n",
+        "    # Join tokens back into text\n",
+        "    text = ' '.join(filtered_tokens)\n",
+        "    return text\n",
+        "\n",
+        "# Apply preprocessing to comments DataFrame\n",
+        "comments_df['clean_comment'] = comments_df['comment'].apply(preprocess_text)\n"
+      ],
+      "metadata": {
+        "id": "x8yDQyaADlvm"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "source": [
+        "** Feature Extraction**"
+      ],
+      "metadata": {
+        "id": "6W7HQPuvEQ0a"
+      }
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "# Import necessary libraries for feature extraction\n",
+        "from sklearn.feature_extraction.text import TfidfVectorizer\n",
+        "\n",
+        "# Initialize TF-IDF vectorizer\n",
+        "tfidf_vectorizer = TfidfVectorizer(max_features=1000)  # Adjust max_features as needed\n",
+        "\n",
+        "# Fit and transform TF-IDF vectorizer on cleaned comments\n",
+        "X = tfidf_vectorizer.fit_transform(comments_df['clean_comment'])\n"
+      ],
+      "metadata": {
+        "id": "pXk3YuTPEaLw"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "source": [
+        "Step 4: Model Training\n"
+      ],
+      "metadata": {
+        "id": "2Ymw9q6REg6H"
+      }
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "# Import necessary libraries for model training\n",
+        "from sklearn.linear_model import LogisticRegression\n",
+        "from sklearn.model_selection import train_test_split\n",
+        "\n",
+        "# Split data into train and test sets\n",
+        "X_train, X_test, y_train, y_test = train_test_split(X, comments_df['label'], test_size=0.2, random_state=42)\n",
+        "\n",
+        "# Initialize and train logistic regression model\n",
+        "model = LogisticRegression()\n",
+        "model.fit(X_train, y_train)\n"
+      ],
+      "metadata": {
+        "id": "T5xyDlQTEmGr"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "source": [
+        "Step 5: Model Evaluation"
+      ],
+      "metadata": {
+        "id": "nL8p1XOUEr2U"
+      }
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "# Import necessary libraries for model evaluation\n",
+        "from sklearn.metrics import accuracy_score, classification_report, confusion_matrix\n",
+        "\n",
+        "# Make predictions on test set\n",
+        "y_pred = model.predict(X_test)\n",
+        "\n",
+        "# Evaluate model performance\n",
+        "accuracy = accuracy_score(y_test, y_pred)\n",
+        "print(\"Accuracy:\", accuracy)\n",
+        "\n",
+        "# Print classification report\n",
+        "print(\"Classification Report:\")\n",
+        "print(classification_report(y_test, y_pred))\n",
+        "\n",
+        "# Plot confusion matrix\n",
+        "conf_matrix = confusion_matrix(y_test, y_pred)\n",
+        "print(\"Confusion Matrix:\")\n",
+        "print(conf_matrix)\n"
+      ],
+      "metadata": {
+        "id": "GYNFTCUtEyqK"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "source": [
+        "Step 6: Model Deployment using Flask"
+      ],
+      "metadata": {
+        "id": "GDxCmH4iE4Pz"
+      }
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "# Import necessary libraries for deployment\n",
+        "from flask import Flask, request, jsonify\n",
+        "\n",
+        "# Initialize Flask app\n",
+        "app = Flask(__name__)\n",
+        "\n",
+        "# Define prediction endpoint\n",
+        "@app.route('/predict', methods=['POST'])\n",
+        "def predict():\n",
+        "    comment = request.json['comment']\n",
+        "    clean_comment = preprocess_text(comment)\n",
+        "    transformed_comment = tfidf_vectorizer.transform([clean_comment])\n",
+        "    prediction = model.predict(transformed_comment)[0]\n",
+        "    return jsonify({'prediction': int(prediction)})\n",
+        "\n",
+        "# Run Flask app\n",
+        "if __name__ == '__main__':\n",
+        "    app.run(debug=True)\n"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "17QDOLNlFwBG",
+        "outputId": "a8dd1462-c1cc-4ba1-e118-3651278b260b"
+      },
+      "execution_count": null,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            " * Serving Flask app '__main__'\n",
+            " * Debug mode: on\n"
+          ]
+        },
+        {
+          "output_type": "stream",
+          "name": "stderr",
+          "text": [
+            "INFO:werkzeug:\u001b[31m\u001b[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.\u001b[0m\n",
+            " * Running on http://127.0.0.1:5000\n",
+            "INFO:werkzeug:\u001b[33mPress CTRL+C to quit\u001b[0m\n",
+            "INFO:werkzeug: * Restarting with stat\n"
+          ]
+        }
+      ]
+    }
+  ]
+}
