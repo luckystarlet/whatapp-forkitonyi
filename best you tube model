@@ -1,0 +1,463 @@
+{
+  "nbformat": 4,
+  "nbformat_minor": 0,
+  "metadata": {
+    "colab": {
+      "provenance": [],
+      "authorship_tag": "ABX9TyO5Rr5tbH7PA/s6WuYjBoAW",
+      "include_colab_link": true
+    },
+    "kernelspec": {
+      "name": "python3",
+      "display_name": "Python 3"
+    },
+    "language_info": {
+      "name": "python"
+    }
+  },
+  "cells": [
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "view-in-github",
+        "colab_type": "text"
+      },
+      "source": [
+        "<a href=\"https://colab.research.google.com/github/luckystarlet/whatapp-forkitonyi/blob/main/best%20you%20tube%20model\" target=\"_parent\"><img src=\"https://colab.research.google.com/assets/colab-badge.svg\" alt=\"Open In Colab\"/></a>"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "source": [],
+      "metadata": {
+        "id": "zhSlY4knAqTp"
+      }
+    },
+    {
+      "cell_type": "markdown",
+      "source": [
+        "Step 1: Data Collection using YouTube API"
+      ],
+      "metadata": {
+        "id": "TW8PQtSzAtYN"
+      }
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 914
+        },
+        "id": "dqSGWuAp_75R",
+        "outputId": "94a2c293-a3af-478b-c3f7-a8e119d8d9b0"
+      },
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Requirement already satisfied: google-auth in /usr/local/lib/python3.10/dist-packages (2.27.0)\n",
+            "Requirement already satisfied: google-auth-oauthlib in /usr/local/lib/python3.10/dist-packages (1.2.0)\n",
+            "Requirement already satisfied: google-auth-httplib2 in /usr/local/lib/python3.10/dist-packages (0.1.1)\n",
+            "Requirement already satisfied: google-api-python-client in /usr/local/lib/python3.10/dist-packages (2.84.0)\n",
+            "Requirement already satisfied: cachetools<6.0,>=2.0.0 in /usr/local/lib/python3.10/dist-packages (from google-auth) (5.3.3)\n",
+            "Requirement already satisfied: pyasn1-modules>=0.2.1 in /usr/local/lib/python3.10/dist-packages (from google-auth) (0.4.0)\n",
+            "Requirement already satisfied: rsa<5,>=3.1.4 in /usr/local/lib/python3.10/dist-packages (from google-auth) (4.9)\n",
+            "Requirement already satisfied: requests-oauthlib>=0.7.0 in /usr/local/lib/python3.10/dist-packages (from google-auth-oauthlib) (1.3.1)\n",
+            "Requirement already satisfied: httplib2>=0.19.0 in /usr/local/lib/python3.10/dist-packages (from google-auth-httplib2) (0.22.0)\n",
+            "Requirement already satisfied: google-api-core!=2.0.*,!=2.1.*,!=2.2.*,!=2.3.0,<3.0.0dev,>=1.31.5 in /usr/local/lib/python3.10/dist-packages (from google-api-python-client) (2.11.1)\n",
+            "Requirement already satisfied: uritemplate<5,>=3.0.1 in /usr/local/lib/python3.10/dist-packages (from google-api-python-client) (4.1.1)\n",
+            "Requirement already satisfied: googleapis-common-protos<2.0.dev0,>=1.56.2 in /usr/local/lib/python3.10/dist-packages (from google-api-core!=2.0.*,!=2.1.*,!=2.2.*,!=2.3.0,<3.0.0dev,>=1.31.5->google-api-python-client) (1.63.0)\n",
+            "Requirement already satisfied: protobuf!=3.20.0,!=3.20.1,!=4.21.0,!=4.21.1,!=4.21.2,!=4.21.3,!=4.21.4,!=4.21.5,<5.0.0.dev0,>=3.19.5 in /usr/local/lib/python3.10/dist-packages (from google-api-core!=2.0.*,!=2.1.*,!=2.2.*,!=2.3.0,<3.0.0dev,>=1.31.5->google-api-python-client) (3.20.3)\n",
+            "Requirement already satisfied: requests<3.0.0.dev0,>=2.18.0 in /usr/local/lib/python3.10/dist-packages (from google-api-core!=2.0.*,!=2.1.*,!=2.2.*,!=2.3.0,<3.0.0dev,>=1.31.5->google-api-python-client) (2.31.0)\n",
+            "Requirement already satisfied: pyparsing!=3.0.0,!=3.0.1,!=3.0.2,!=3.0.3,<4,>=2.4.2 in /usr/local/lib/python3.10/dist-packages (from httplib2>=0.19.0->google-auth-httplib2) (3.1.2)\n",
+            "Requirement already satisfied: pyasn1<0.7.0,>=0.4.6 in /usr/local/lib/python3.10/dist-packages (from pyasn1-modules>=0.2.1->google-auth) (0.6.0)\n",
+            "Requirement already satisfied: oauthlib>=3.0.0 in /usr/local/lib/python3.10/dist-packages (from requests-oauthlib>=0.7.0->google-auth-oauthlib) (3.2.2)\n",
+            "Requirement already satisfied: charset-normalizer<4,>=2 in /usr/local/lib/python3.10/dist-packages (from requests<3.0.0.dev0,>=2.18.0->google-api-core!=2.0.*,!=2.1.*,!=2.2.*,!=2.3.0,<3.0.0dev,>=1.31.5->google-api-python-client) (3.3.2)\n",
+            "Requirement already satisfied: idna<4,>=2.5 in /usr/local/lib/python3.10/dist-packages (from requests<3.0.0.dev0,>=2.18.0->google-api-core!=2.0.*,!=2.1.*,!=2.2.*,!=2.3.0,<3.0.0dev,>=1.31.5->google-api-python-client) (3.7)\n",
+            "Requirement already satisfied: urllib3<3,>=1.21.1 in /usr/local/lib/python3.10/dist-packages (from requests<3.0.0.dev0,>=2.18.0->google-api-core!=2.0.*,!=2.1.*,!=2.2.*,!=2.3.0,<3.0.0dev,>=1.31.5->google-api-python-client) (2.0.7)\n",
+            "Requirement already satisfied: certifi>=2017.4.17 in /usr/local/lib/python3.10/dist-packages (from requests<3.0.0.dev0,>=2.18.0->google-api-core!=2.0.*,!=2.1.*,!=2.2.*,!=2.3.0,<3.0.0dev,>=1.31.5->google-api-python-client) (2024.2.2)\n",
+            "Enter a valid YouTube video ID (e.g., 'Ks-_Mh1QhMc'): Ks-_Mh1QhMc\n",
+            "Fetched 7571 comments.\n"
+          ]
+        },
+        {
+          "output_type": "stream",
+          "name": "stderr",
+          "text": [
+            "WARNING:googleapiclient.http:Encountered 403 Forbidden with reason \"quotaExceeded\"\n"
+          ]
+        },
+        {
+          "output_type": "error",
+          "ename": "HttpError",
+          "evalue": "<HttpError 403 when requesting https://youtube.googleapis.com/youtube/v3/search?part=id&q=machine+learning&type=video&maxResults=10&key=AIzaSyB9mWPsOvoNnEreqdfLYyl3qa_k9cXVcC0&alt=json&pageToken=CPwCEAA returned \"The request cannot be completed because you have exceeded your <a href=\"/youtube/v3/getting-started#quota\">quota</a>.\". Details: \"[{'message': 'The request cannot be completed because you have exceeded your <a href=\"/youtube/v3/getting-started#quota\">quota</a>.', 'domain': 'youtube.quota', 'reason': 'quotaExceeded'}]\">",
+          "traceback": [
+            "\u001b[0;31m---------------------------------------------------------------------------\u001b[0m",
+            "\u001b[0;31mHttpError\u001b[0m                                 Traceback (most recent call last)",
+            "\u001b[0;32m<ipython-input-3-e3b2d198a1ce>\u001b[0m in \u001b[0;36m<cell line: 65>\u001b[0;34m()\u001b[0m\n\u001b[1;32m     63\u001b[0m \u001b[0;31m# Example: Search for videos related to 'machine learning'\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m     64\u001b[0m \u001b[0mquery\u001b[0m \u001b[0;34m=\u001b[0m \u001b[0;34m'machine learning'\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0;32m---> 65\u001b[0;31m \u001b[0mvideo_ids\u001b[0m \u001b[0;34m=\u001b[0m \u001b[0msearch_videos\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0mquery\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0m\u001b[1;32m     66\u001b[0m \u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m     67\u001b[0m \u001b[0;31m# Print the first 5 video IDs\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n",
+            "\u001b[0;32m<ipython-input-3-e3b2d198a1ce>\u001b[0m in \u001b[0;36msearch_videos\u001b[0;34m(query, max_results)\u001b[0m\n\u001b[1;32m     55\u001b[0m     )\n\u001b[1;32m     56\u001b[0m     \u001b[0;32mwhile\u001b[0m \u001b[0mrequest\u001b[0m\u001b[0;34m:\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0;32m---> 57\u001b[0;31m         \u001b[0mresponse\u001b[0m \u001b[0;34m=\u001b[0m \u001b[0mrequest\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mexecute\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0m\u001b[1;32m     58\u001b[0m         \u001b[0;32mfor\u001b[0m \u001b[0mitem\u001b[0m \u001b[0;32min\u001b[0m \u001b[0mresponse\u001b[0m\u001b[0;34m[\u001b[0m\u001b[0;34m'items'\u001b[0m\u001b[0;34m]\u001b[0m\u001b[0;34m:\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m     59\u001b[0m             \u001b[0mvideo_ids\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mappend\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0mitem\u001b[0m\u001b[0;34m[\u001b[0m\u001b[0;34m'id'\u001b[0m\u001b[0;34m]\u001b[0m\u001b[0;34m[\u001b[0m\u001b[0;34m'videoId'\u001b[0m\u001b[0;34m]\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n",
+            "\u001b[0;32m/usr/local/lib/python3.10/dist-packages/googleapiclient/_helpers.py\u001b[0m in \u001b[0;36mpositional_wrapper\u001b[0;34m(*args, **kwargs)\u001b[0m\n\u001b[1;32m    128\u001b[0m                 \u001b[0;32melif\u001b[0m \u001b[0mpositional_parameters_enforcement\u001b[0m \u001b[0;34m==\u001b[0m \u001b[0mPOSITIONAL_WARNING\u001b[0m\u001b[0;34m:\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m    129\u001b[0m                     \u001b[0mlogger\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mwarning\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0mmessage\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0;32m--> 130\u001b[0;31m             \u001b[0;32mreturn\u001b[0m \u001b[0mwrapped\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0;34m*\u001b[0m\u001b[0margs\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0;34m**\u001b[0m\u001b[0mkwargs\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0m\u001b[1;32m    131\u001b[0m \u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m    132\u001b[0m         \u001b[0;32mreturn\u001b[0m \u001b[0mpositional_wrapper\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n",
+            "\u001b[0;32m/usr/local/lib/python3.10/dist-packages/googleapiclient/http.py\u001b[0m in \u001b[0;36mexecute\u001b[0;34m(self, http, num_retries)\u001b[0m\n\u001b[1;32m    936\u001b[0m             \u001b[0mcallback\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0mresp\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m    937\u001b[0m         \u001b[0;32mif\u001b[0m \u001b[0mresp\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mstatus\u001b[0m \u001b[0;34m>=\u001b[0m \u001b[0;36m300\u001b[0m\u001b[0;34m:\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0;32m--> 938\u001b[0;31m             \u001b[0;32mraise\u001b[0m \u001b[0mHttpError\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0mresp\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mcontent\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0muri\u001b[0m\u001b[0;34m=\u001b[0m\u001b[0mself\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0muri\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0m\u001b[1;32m    939\u001b[0m         \u001b[0;32mreturn\u001b[0m \u001b[0mself\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mpostproc\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0mresp\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mcontent\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m    940\u001b[0m \u001b[0;34m\u001b[0m\u001b[0m\n",
+            "\u001b[0;31mHttpError\u001b[0m: <HttpError 403 when requesting https://youtube.googleapis.com/youtube/v3/search?part=id&q=machine+learning&type=video&maxResults=10&key=AIzaSyB9mWPsOvoNnEreqdfLYyl3qa_k9cXVcC0&alt=json&pageToken=CPwCEAA returned \"The request cannot be completed because you have exceeded your <a href=\"/youtube/v3/getting-started#quota\">quota</a>.\". Details: \"[{'message': 'The request cannot be completed because you have exceeded your <a href=\"/youtube/v3/getting-started#quota\">quota</a>.', 'domain': 'youtube.quota', 'reason': 'quotaExceeded'}]\">"
+          ]
+        }
+      ],
+      "source": [
+        "from googleapiclient.discovery import build\n",
+        "!pip install google-auth google-auth-oauthlib google-auth-httplib2 google-api-python-client\n",
+        "import pandas as pd\n",
+        "# Set up YouTube API key\n",
+        "api_key = 'AIzaSyB9mWPsOvoNnEreqdfLYyl3qa_k9cXVcC0'\n",
+        "\n",
+        "# Initialize YouTube API client\n",
+        "youtube = build('youtube', 'v3', developerKey=api_key)\n",
+        "import googleapiclient.discovery\n",
+        "\n",
+        "# Function to fetch comments from a video\n",
+        "def get_video_comments(video_id, api_key):\n",
+        "    comments = []\n",
+        "    youtube = googleapiclient.discovery.build(\"youtube\", \"v3\", developerKey=api_key)\n",
+        "    request = youtube.commentThreads().list(\n",
+        "        part=\"snippet\",\n",
+        "        videoId=video_id,\n",
+        "        maxResults=100  # Adjust as needed\n",
+        "    )\n",
+        "    response = request.execute()\n",
+        "\n",
+        "    while request:\n",
+        "        for item in response['items']:\n",
+        "            comment = item['snippet']['topLevelComment']['snippet']['textDisplay']\n",
+        "            comments.append(comment)\n",
+        "\n",
+        "        # Check for more comments\n",
+        "        if 'nextPageToken' in response:\n",
+        "            request = youtube.commentThreads().list(\n",
+        "                part=\"snippet\",\n",
+        "                videoId=video_id,\n",
+        "                pageToken=response['nextPageToken'],\n",
+        "                maxResults=100\n",
+        "            )\n",
+        "            response = request.execute()\n",
+        "        else:\n",
+        "            break\n",
+        "\n",
+        "    return comments\n",
+        "\n",
+        "# Example usage\n",
+        "api_key = \"AIzaSyB9mWPsOvoNnEreqdfLYyl3qa_k9cXVcC0\"\n",
+        "video_id = input(\"Enter a valid YouTube video ID (e.g., 'Ks-_Mh1QhMc'): \")\n",
+        "comments = get_video_comments(video_id, api_key)\n",
+        "print(f\"Fetched {len(comments)} comments.\")\n",
+        "\n",
+        "# Search for videos using a specific query\n",
+        "def search_videos(query, max_results=10):\n",
+        "    video_ids = []\n",
+        "    request = youtube.search().list(\n",
+        "        part='id',\n",
+        "        q=query,\n",
+        "        type='video',\n",
+        "        maxResults=max_results\n",
+        "    )\n",
+        "    while request:\n",
+        "        response = request.execute()\n",
+        "        for item in response['items']:\n",
+        "            video_ids.append(item['id']['videoId'])\n",
+        "        request = youtube.search().list_next(request, response)\n",
+        "    return video_ids\n",
+        "\n",
+        "# Example: Search for videos related to 'machine learning'\n",
+        "query = 'machine learning'\n",
+        "video_ids = search_videos(query)\n",
+        "\n",
+        "# Print the first 5 video IDs\n",
+        "print(video_ids[:5])\n",
+        "# Search for comments on a specific video\n",
+        "def get_video_comments(video_id):\n",
+        "    comments = []\n",
+        "    request = youtube.commentThreads().list(\n",
+        "        part='snippet',\n",
+        "        videoId=video_id,\n",
+        "        maxResults=100  # Adjust as needed\n",
+        "    )\n",
+        "    while request:\n",
+        "        response = request.execute()\n",
+        "        for item in response['items']:\n",
+        "            comment = item['snippet']['topLevelComment']['snippet']['textOriginal']\n",
+        "            comments.append(comment)\n",
+        "        request = youtube.commentThreads().list_next(request, response)\n",
+        "    return comments\n",
+        "\n",
+        "# Example: Get comments from a video\n",
+        "video_id = input(\"Enter a valid YouTube video ID: \")\n",
+        "comments = get_video_comments(video_id)\n",
+        "\n",
+        "# Convert comments to DataFrame\n",
+        "comments_df = pd.DataFrame(comments, columns=['comment'])"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "source": [
+        "Data Preprocessing**"
+      ],
+      "metadata": {
+        "id": "LtAOsXJSDVwP"
+      }
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "import nltk\n",
+        "import re\n",
+        "from sklearn.feature_extraction.text import TfidfVectorizer\n",
+        "\n",
+        "nltk.download('stopwords')\n",
+        "nltk.download('punkt')\n",
+        "\n",
+        "def preprocess_text(text):\n",
+        "    text = text.lower()\n",
+        "    text = re.sub(r'http\\S+|www\\S+|@[^\\s]+', '', text)\n",
+        "    text = re.sub(r'[^\\w\\s]', '', text)\n",
+        "    tokens = nltk.word_tokenize(text)\n",
+        "    stop_words = set(nltk.corpus.stopwords.words('english'))\n",
+        "    filtered_tokens = [word for word in tokens if word not in stop_words]\n",
+        "    return ' '.join(filtered_tokens)\n",
+        "\n",
+        "clean_comments = [preprocess_text(comment) for comment in comments]\n",
+        "\n",
+        "# Vectorize text data\n",
+        "vectorizer = TfidfVectorizer()\n",
+        "X = vectorizer.fit_transform(clean_comments)\n",
+        "\n",
+        "# Sample labels for demonstration (Replace with actual labels)\n",
+        "labels = [1 if 'great' in comment else 0 for comment in clean_comments]\n"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "18-ZKmgDWCSe",
+        "outputId": "445bde37-2adc-40a6-a043-0711076de52b"
+      },
+      "execution_count": null,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stderr",
+          "text": [
+            "[nltk_data] Downloading package stopwords to /root/nltk_data...\n",
+            "[nltk_data]   Unzipping corpora/stopwords.zip.\n",
+            "[nltk_data] Downloading package punkt to /root/nltk_data...\n",
+            "[nltk_data]   Unzipping tokenizers/punkt.zip.\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "source": [
+        " Model Training and Evaluation"
+      ],
+      "metadata": {
+        "id": "6W7HQPuvEQ0a"
+      }
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "from sklearn.model_selection import train_test_split, GridSearchCV\n",
+        "from sklearn.linear_model import LogisticRegression\n",
+        "from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, confusion_matrix\n",
+        "\n",
+        "# Split data\n",
+        "X_train, X_test, y_train, y_test = train_test_split(X, labels, test_size=0.2, random_state=42)\n",
+        "\n",
+        "# Hyperparameter tuning with GridSearchCV\n",
+        "param_grid = {'C': [0.1, 1, 10, 100], 'penalty': ['l1', 'l2']}\n",
+        "grid_search = GridSearchCV(LogisticRegression(solver='liblinear'), param_grid, cv=2)\n",
+        "grid_search.fit(X_train, y_train)\n",
+        "\n",
+        "print(\"Best Parameters:\", grid_search.best_params_)\n",
+        "print(\"Best CV Score:\", grid_search.best_score_)\n",
+        "\n",
+        "# Train the best model\n",
+        "model = grid_search.best_estimator_\n",
+        "\n",
+        "# Evaluate model\n",
+        "y_pred = model.predict(X_test)\n",
+        "accuracy = accuracy_score(y_test, y_pred)\n",
+        "precision = precision_score(y_test, y_pred, zero_division=0)\n",
+        "recall = recall_score(y_test, y_pred, zero_division=0)\n",
+        "f1 = f1_score(y_test, y_pred, zero_division=0)\n",
+        "conf_matrix = confusion_matrix(y_test, y_pred)\n",
+        "\n",
+        "print(f\"Accuracy: {accuracy}\")\n",
+        "print(f\"Precision: {precision}\")\n",
+        "print(f\"Recall: {recall}\")\n",
+        "print(f\"F1-score: {f1}\")\n",
+        "print(\"Confusion Matrix:\")\n",
+        "print(conf_matrix)\n"
+      ],
+      "metadata": {
+        "id": "ZCZTyPOQWWuy",
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "outputId": "6ca4c412-4966-43f0-d220-7357f0ebfda9"
+      },
+      "execution_count": 5,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stderr",
+          "text": [
+            "/usr/local/lib/python3.10/dist-packages/sklearn/svm/_base.py:1244: ConvergenceWarning: Liblinear failed to converge, increase the number of iterations.\n",
+            "  warnings.warn(\n",
+            "/usr/local/lib/python3.10/dist-packages/sklearn/svm/_base.py:1244: ConvergenceWarning: Liblinear failed to converge, increase the number of iterations.\n",
+            "  warnings.warn(\n"
+          ]
+        },
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Best Parameters: {'C': 100, 'penalty': 'l1'}\n",
+            "Best CV Score: 0.9953764861294584\n",
+            "Accuracy: 0.9993399339933994\n",
+            "Precision: 1.0\n",
+            "Recall: 0.9900990099009901\n",
+            "F1-score: 0.9950248756218906\n",
+            "Confusion Matrix:\n",
+            "[[1414    0]\n",
+            " [   1  100]]\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "source": [
+        "Step 4: Save the Model"
+      ],
+      "metadata": {
+        "id": "vIF3hGh6Znnk"
+      }
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "import pickle\n",
+        "\n",
+        "# Save the model and vectorizer\n",
+        "with open('model.pkl', 'wb') as model_file:\n",
+        "    pickle.dump(model, model_file)\n",
+        "with open('vectorizer.pkl', 'wb') as vectorizer_file:\n",
+        "    pickle.dump(vectorizer, vectorizer_file)\n"
+      ],
+      "metadata": {
+        "id": "07NrOHIqZsd9"
+      },
+      "execution_count": 7,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "source": [
+        "Step 5: Deploy the Model on Google Cloud\n",
+        "Create a Flask Application:"
+      ],
+      "metadata": {
+        "id": "CiqvHq_-Z1EI"
+      }
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "from flask import Flask, request, jsonify\n",
+        "import pickle\n",
+        "import re\n",
+        "import nltk\n",
+        "nltk.download('stopwords')\n",
+        "nltk.download('punkt')\n",
+        "gcloud init\n",
+        "gcloud app create\n",
+        "\n",
+        "\n",
+        "app = Flask(__name__)\n",
+        "\n",
+        "# Load model and vectorizer\n",
+        "with open('model.pkl', 'rb') as model_file:\n",
+        "    model = pickle.load(model_file)\n",
+        "with open('vectorizer.pkl', 'rb') as vectorizer_file:\n",
+        "    vectorizer = pickle.load(vectorizer_file)\n",
+        "\n",
+        "def preprocess_text(text):\n",
+        "    text = text.lower()\n",
+        "    text = re.sub(r'http\\S+|www\\S+|@[^\\s]+', '', text)\n",
+        "    text = re.sub(r'[^\\w\\s]', '', text)\n",
+        "    tokens = nltk.word_tokenize(text)\n",
+        "    stop_words = set(nltk.corpus.stopwords.words('english'))\n",
+        "    filtered_tokens = [word for word in tokens if word not in stop_words]\n",
+        "    return ' '.join(filtered_tokens)\n",
+        "\n",
+        "@app.route('/predict', methods=['POST'])\n",
+        "def predict():\n",
+        "    data = request.get_json(force=True)\n",
+        "    comment = data['comment']\n",
+        "    clean_comment = preprocess_text(comment)\n",
+        "    vectorized_comment = vectorizer.transform([clean_comment])\n",
+        "    prediction = model.predict(vectorized_comment)\n",
+        "    return jsonify({'prediction': int(prediction[0])})\n",
+        "\n",
+        "if __name__ == '__main__':\n",
+        "    app.run(debug=True)\n"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "GK5TavcJbJ1N",
+        "outputId": "dbaa5bb8-f6ce-409a-9138-a34832edaf62"
+      },
+      "execution_count": null,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            " * Serving Flask app '__main__'\n",
+            " * Debug mode: on\n"
+          ]
+        },
+        {
+          "output_type": "stream",
+          "name": "stderr",
+          "text": [
+            "[nltk_data] Downloading package stopwords to /root/nltk_data...\n",
+            "[nltk_data]   Package stopwords is already up-to-date!\n",
+            "[nltk_data] Downloading package punkt to /root/nltk_data...\n",
+            "[nltk_data]   Package punkt is already up-to-date!\n",
+            "INFO:werkzeug:\u001b[31m\u001b[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.\u001b[0m\n",
+            " * Running on http://127.0.0.1:5000\n",
+            "INFO:werkzeug:\u001b[33mPress CTRL+C to quit\u001b[0m\n",
+            "INFO:werkzeug: * Restarting with stat\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "!curl -X POST http://YOUR_APP_URL/predict -H \"Content-Type: application/json\" -d '{\"comment\": \"Great video!\"}'"
+      ],
+      "metadata": {
+        "id": "RiVOwxeNaInC"
+      },
+      "execution_count": null,
+      "outputs": []
+    }
+  ]
+}
